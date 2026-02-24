@@ -10,31 +10,33 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #000; }
         .aura-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
-        .product-card { background: white; border-radius: 20px; padding: 12px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; }
-        .product-img { height: 130px; width: 100%; object-fit: contain; }
+        .product-card { background: white; border-radius: 20px; padding: 15px; border: 1px solid #f1f5f9; display: flex; flex-direction: column; height: 100%; transition: all 0.2s; }
+        .product-img { height: 140px; width: 100%; object-fit: contain; mix-blend-mode: multiply; }
         .hidden-admin { display: none !important; }
-        .category-btn.active { background-color: #000 !important; color: #fff !important; }
+        .category-btn.active { background-color: #000 !important; color: #fff !important; border-color: #000 !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
-    <nav class="border-b sticky top-0 bg-white/90 backdrop-blur-md z-50 px-4 py-4 flex justify-between items-center">
+    <nav class="border-b sticky top-0 bg-white/90 backdrop-blur-md z-50 px-6 py-4 flex justify-between items-center">
         <h1 class="text-xl font-extrabold italic tracking-tighter text-indigo-600">AURA<span class="text-black font-light">BOUTIQUE</span></h1>
         <div class="flex items-center gap-3">
-            <button id="admin-btn" onclick="toggleAdmin()" class="hidden-admin bg-black text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase">PROPRIO</button>
-            <button id="login-trigger" onclick="openLogin()" class="text-gray-400 text-xl"><i class="fa-solid fa-circle-user"></i></button>
+            <button id="admin-btn" onclick="toggleAdmin()" class="hidden-admin bg-black text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-lg">PROPRIO</button>
+            <button id="login-trigger" onclick="openLogin()" class="text-gray-400 hover:text-black transition text-xl"><i class="fa-solid fa-circle-user"></i></button>
             <button onclick="toggleCart()" class="relative text-xl text-slate-700">
                 <i class="fa-solid fa-cart-shopping"></i>
-                <span id="cart-count" class="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">0</span>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold border-2 border-white">0</span>
             </button>
         </div>
     </nav>
 
-    <div class="flex gap-2 overflow-x-auto p-4 no-scrollbar border-b bg-white">
-        <button onclick="filterCategory('Tous')" class="category-btn active px-4 py-2 rounded-full text-[11px] font-bold border">Tous</button>
-        <button onclick="filterCategory('Chaussures')" class="category-btn px-4 py-2 rounded-full text-[11px] font-bold border text-gray-500">Chaussures</button>
-        <button onclick="filterCategory('Vêtements')" class="category-btn px-4 py-2 rounded-full text-[11px] font-bold border text-gray-500">Vêtements</button>
-        <button onclick="filterCategory('Tech')" class="category-btn px-4 py-2 rounded-full text-[11px] font-bold border text-gray-500">Tech</button>
+    <div class="flex gap-2 overflow-x-auto p-4 no-scrollbar border-b bg-white sticky top-[73px] z-40">
+        <button onclick="filterCategory('Tous')" class="category-btn active px-5 py-2 rounded-full text-[11px] font-bold border border-gray-100 whitespace-nowrap">Tous</button>
+        <button onclick="filterCategory('Chaussures')" class="category-btn px-5 py-2 rounded-full text-[11px] font-bold border border-gray-100 text-gray-500 whitespace-nowrap">Chaussures</button>
+        <button onclick="filterCategory('Vêtements')" class="category-btn px-5 py-2 rounded-full text-[11px] font-bold border border-gray-100 text-gray-500 whitespace-nowrap">Vêtements</button>
+        <button onclick="filterCategory('Tech')" class="category-btn px-5 py-2 rounded-full text-[11px] font-bold border border-gray-100 text-gray-500 whitespace-nowrap">Tech</button>
+        <button onclick="filterCategory('Audio')" class="category-btn px-5 py-2 rounded-full text-[11px] font-bold border border-gray-100 text-gray-500 whitespace-nowrap">Audio</button>
     </div>
 
     <main class="max-w-7xl mx-auto p-4">
@@ -42,61 +44,73 @@
     </main>
 
     <div id="login-modal" class="fixed inset-0 bg-black/60 z-[400] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-sm">
-            <h3 class="text-xl font-bold mb-6 text-center">Connexion Staff</h3>
-            <input type="email" id="admin-email" placeholder="Email propriétaire" class="w-full border p-3 rounded-xl mb-4 outline-none focus:border-indigo-500">
-            <button onclick="checkLogin()" class="w-full bg-black text-white py-3 rounded-xl font-bold uppercase">Valider</button>
-            <button onclick="closeLogin()" class="w-full text-gray-400 text-xs mt-4">RETOUR</button>
+        <div class="bg-white rounded-3xl p-8 w-full max-w-sm text-black">
+            <h3 class="text-xl font-bold mb-2 text-center">Connexion Staff</h3>
+            <p class="text-gray-400 text-[10px] text-center mb-6 uppercase tracking-widest">Accès Propriétaire Uniquement</p>
+            <input type="email" id="admin-email" placeholder="Email autorisé" class="w-full border-2 border-gray-100 p-4 rounded-2xl mb-4 outline-none focus:border-indigo-500 transition">
+            <button onclick="checkLogin()" class="w-full bg-black text-white py-4 rounded-2xl font-bold uppercase text-xs tracking-widest">Valider</button>
+            <button onclick="closeLogin()" class="w-full text-gray-400 text-[10px] mt-6 font-bold uppercase">Retour</button>
         </div>
     </div>
 
-    <div id="cart-panel" class="fixed inset-0 bg-black/50 z-[200] hidden">
-        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white p-8 flex flex-col">
-            <h3 class="text-2xl font-bold mb-8 italic">Mon Panier</h3>
+    <div id="cart-panel" class="fixed inset-0 bg-black/50 z-[200] hidden backdrop-blur-sm">
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white p-8 flex flex-col text-black">
+            <h3 class="text-2xl font-black italic uppercase mb-8 tracking-tighter">Votre Panier</h3>
             <div id="cart-items" class="flex-1 overflow-y-auto space-y-4"></div>
             <div class="border-t pt-6 mt-6">
-                <div class="flex justify-between text-xl font-bold mb-6 text-indigo-600"><span>Total</span><span id="cart-total">0.00 €</span></div>
-                <button onclick="checkout()" class="w-full aura-gradient text-white py-4 rounded-2xl font-extrabold shadow-lg">COMMANDER SUR WHATSAPP</button>
-                <button onclick="toggleCart()" class="w-full text-gray-400 mt-4 text-sm">Fermer</button>
+                <div class="flex justify-between text-xl font-bold mb-6"><span>Total</span><span id="cart-total" class="text-indigo-600">0.00 €</span></div>
+                <button onclick="checkout()" class="w-full aura-gradient text-white py-5 rounded-2xl font-extrabold shadow-xl uppercase tracking-widest">Commander sur WhatsApp</button>
             </div>
         </div>
     </div>
 
-    <div id="admin-panel" class="fixed inset-0 bg-black/80 z-[300] hidden flex items-center justify-center p-6">
+    <div id="admin-panel" class="fixed inset-0 bg-black/80 z-[300] hidden flex items-center justify-center p-6 text-black">
         <div class="bg-white rounded-3xl p-8 w-full max-w-sm text-center">
-            <h3 class="text-xl font-bold mb-4 italic">Mise à jour Catalogue</h3>
-            <input type="file" id="csv-file" accept=".csv" class="mb-4 block w-full text-xs text-slate-500"/>
-            <button onclick="processCSV()" class="w-full bg-black text-white py-3 rounded-xl font-bold mb-2 uppercase">Importer CSV</button>
-            <button onclick="toggleAdmin()" class="text-gray-400 text-sm py-2">Fermer</button>
+            <h3 class="text-xl font-bold mb-4 italic uppercase">Mise à jour Boutique</h3>
+            <input type="file" id="csv-file" accept=".csv" class="mb-6 block w-full text-xs text-slate-500"/>
+            <button onclick="processCSV()" class="w-full bg-black text-white py-4 rounded-2xl font-bold uppercase text-xs mb-2 shadow-lg">Importer CSV</button>
+            <button onclick="toggleAdmin()" class="text-gray-400 text-[10px] font-bold uppercase mt-4">Fermer</button>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        const EMAILS_AUTORISES = ["tonmail@gmail.com"]; // METS TON MAIL ICI
-        const WHATSAPP_NUM = "33600000000"; // TON NUMERO ICI
+        // --- ⚙️ CONFIGURATION ---
+        const EMAILS_AUTORISES = ["tonmail@gmail.com", "collegue@gmail.com"]; 
+        const WHATSAPP_NUM = "33600000000"; 
 
         let cart = [];
         const products = [
-            { name: "Air Force 1 White", price: 23, cat: "Chaussures", img: "https://www.crepslocker.com/cdn/shop/files/Nike-Air-Force-1-Low-07-Triple-White-CW2288-111-1.png" },
-            { name: "Jordan 4 Thunder", price: 23, cat: "Chaussures", img: "https://media.solesavy.com/wp-content/uploads/2023/05/Air-Jordan-4-Thunder-DH6927-017-Release-Date-1.jpg" },
-            { name: "Jordan 1 Retro High", price: 30, cat: "Chaussures", img: "https://www.crepslocker.com/cdn/shop/products/Air-Jordan-1-Retro-High-OG-Lost-and-Found-Chicago-DZ5485-612-1.png" },
-            { name: "Dior B30 Black", price: 27, cat: "Chaussures", img: "https://images.clothes.luxury/f_auto,q_auto/v1/products/dior-b30-sneaker-black-mesh-and-technical-fabric-7450" },
-            { name: "Puffer North Face", price: 90, cat: "Vêtements", img: "https://www.stadiumgoods.com/cdn-cgi/image/fit%3Dcontain%2Cformat%3Dauto%2Cwidth%3D2000/media/catalog/product/N/F/NF0A3C8DLE4-1_1.png" },
-            { name: "iPhone 16 Pro Max", price: 790, cat: "Tech", img: "https://images.clothes.luxury/f_auto,q_auto/v1/products/apple-iphone-16-pro-max-256gb-black-titanium-1" },
-            { name: "AirPods Max Silver", price: 145, cat: "Tech", img: "https://www.kickgame.co.uk/cdn/shop/products/apple-airpods-max-headphones-silver-kick-game.png" },
-            { name: "JBL Boombox 3", price: 110, cat: "Audio", img: "https://images.clothes.luxury/f_auto,q_auto/v1/products/jbl-boombox-3-portable-bluetooth-speaker-black-1" }
+            // CHAUSSURES (Prix Revente Dropshipping)
+            { name: "Nike Air Force 1 '07 White", price: 110.00, cat: "Chaussures", img: "https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/AIR+FORCE+1+%2707.png" },
+            { name: "Jordan 4 White Thunder", price: 280.00, cat: "Chaussures", img: "https://images.stockx.com/images/Air-Jordan-4-Retro-White-Thunder-Product.jpg" },
+            { name: "Jordan 1 Retro Chicago", price: 190.00, cat: "Chaussures", img: "https://images.stockx.com/images/Air-Jordan-1-Retro-High-OG-Chicago-Reimagined-Product.jpg" },
+            { name: "Dior B30 Sneaker Black", price: 130.00, cat: "Chaussures", img: "https://images.stockx.com/images/Dior-B30-Black-Mesh-and-Technical-Fabric-Product.jpg" },
+            
+            // VETEMENTS
+            { name: "Veste North Face 700 Black", price: 210.00, cat: "Vêtements", img: "https://images.stockx.com/images/The-North-Face-1996-Retro-Nuptse-Packable-Jacket-Black-Product.jpg" },
+            { name: "Gallery Dept. Jean Blue", price: 125.00, cat: "Vêtements", img: "https://images.stockx.com/images/Gallery-Dept-Le-501-Jeans-Blue-Product.jpg" },
+            { name: "Moncler Maya Jacket Black", price: 350.00, cat: "Vêtements", img: "https://images.clothes.luxury/f_auto,q_auto/v1/products/moncler-maya-short-down-jacket-black-1" },
+            
+            // TECH
+            { name: "iPhone 16 Pro Max 256GB", price: 1479.00, cat: "Tech", img: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-16-pro-model-unselect-gallery-2-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80" },
+            { name: "AirPods Max Silver", price: 420.00, cat: "Tech", img: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/airpods-max-select-silver-202011?wid=470&hei=556&fmt=png-alpha" },
+            { name: "AirPods Pro 2", price: 195.00, cat: "Tech", img: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/MTJV3?wid=1144&hei=1144&fmt=jpeg&qlt=90" },
+            
+            // AUDIO
+            { name: "JBL Boombox 3", price: 320.00, cat: "Audio", img: "https://www.jbl.com/dw/image/v2/AA9H_PRD/on/demandware.static/-/Sites-masterCatalog_Harman/default/dw106d8124/JBL_BOOMBOX_3_HERO_BLACK_29352_x1.png" },
+            { name: "Marshall Emberton II", price: 135.00, cat: "Audio", img: "https://www.marshallheadphones.com/dw/image/v2/BCQL_PRD/on/demandware.static/-/Sites-zs-master-catalog/default/dw18721c56/images/marshall/speakers/emberton-ii/high-res/pos-marshall-emberton-ii-black-brass-01.png" }
         ];
 
         function openLogin() { document.getElementById('login-modal').classList.remove('hidden'); }
         function closeLogin() { document.getElementById('login-modal').classList.add('hidden'); }
+        
         function checkLogin() {
             const email = document.getElementById('admin-email').value.toLowerCase();
             if (EMAILS_AUTORISES.includes(email)) {
                 document.getElementById('admin-btn').classList.remove('hidden-admin');
                 document.getElementById('login-trigger').classList.add('hidden-admin');
                 closeLogin();
-                alert("Connecté Chef !");
+                alert("Accès Propriétaire Activé !");
             } else { alert("Email non reconnu."); }
         }
 
@@ -110,15 +124,17 @@
 
         function renderProducts(filter = 'Tous') {
             const grid = document.getElementById('products-grid');
-            const filtered = filter === 'Tous' ? products : products.filter(p => p.cat === filter);
+            const filtered = filter === 'Tous' ? products : products.filter(p => p.cat.includes(filter));
             grid.innerHTML = filtered.map(p => `
                 <div class="product-card">
-                    <div class="h-32 flex items-center justify-center mb-2">
-                        <img src="${p.img}" class="product-img" onerror="this.src='https://via.placeholder.com/150?text=Aura+Boutique'">
+                    <div class="h-36 flex items-center justify-center mb-4">
+                        <img src="${p.img}" class="product-img" onerror="this.src='https://via.placeholder.com/200?text=Aura+Boutique'">
                     </div>
-                    <h4 class="font-bold text-[12px] h-8 leading-tight mb-1 uppercase">${p.name}</h4>
-                    <p class="text-indigo-600 font-black text-sm mb-3">${p.price}€</p>
-                    <button onclick="addToCart('${p.name}', ${p.price})" class="w-full bg-black text-white py-2 rounded-xl text-[10px] font-bold">AJOUTER</button>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-[11px] h-8 leading-tight mb-1 uppercase">${p.name}</h4>
+                        <p class="text-indigo-600 font-black text-sm mb-4">${p.price.toFixed(2)}€</p>
+                    </div>
+                    <button onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price})" class="w-full bg-black text-white py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest active:scale-95 transition">Ajouter</button>
                 </div>
             `).join('');
         }
@@ -129,16 +145,16 @@
         function addToCart(name, price) {
             cart.push({ name, price });
             updateCart();
-            alert("Ajouté !");
+            alert("Ajouté au panier !");
         }
 
         function updateCart() {
             document.getElementById('cart-count').innerText = cart.length;
             const items = document.getElementById('cart-items');
             items.innerHTML = cart.map((item, index) => `
-                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-xl">
-                    <span class="text-[11px] font-bold uppercase">${item.name}</span>
-                    <button onclick="cart.splice(${index},1);updateCart()" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
+                <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl">
+                    <span class="text-[10px] font-bold uppercase">${item.name}</span>
+                    <button onclick="cart.splice(${index},1);updateCart()" class="text-red-500 font-bold">X</button>
                 </div>
             `).join('');
             const total = cart.reduce((sum, item) => sum + item.price, 0);
@@ -147,8 +163,9 @@
 
         function checkout() {
             if(cart.length === 0) return;
-            let msg = "Nouvelle commande :%0A";
-            cart.forEach(i => msg += `- ${i.name}%0A`);
+            let msg = "Salut Aura Boutique, je souhaite commander :%0A";
+            cart.forEach(i => msg += `- ${i.name} (${i.price}€)%0A`);
+            msg += `%0A*TOTAL : ${document.getElementById('cart-total').innerText}*`;
             window.location.href = `https://wa.me/${WHATSAPP_NUM}?text=${msg}`;
         }
 
