@@ -8,12 +8,14 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
         .aura-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
-        .product-img { height: 200px; object-fit: contain; width: 100%; filter: drop-shadow(0 10px 8px rgba(0,0,0,0.1)); }
+        .product-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-card:hover { transform: translateY(-5px); }
+        .category-btn.active { background-color: #000; color: #fff; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body>
 
     <nav class="border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur-md z-50">
         <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -23,14 +25,19 @@
                     <i class="fa-solid fa-cart-shopping text-xl"></i>
                     <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">0</span>
                 </button>
-                <button onclick="toggleAdmin()" class="bg-black text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-indigo-600 transition">Propriétaire</button>
             </div>
+        </div>
+        <div class="flex gap-2 overflow-x-auto px-6 pb-4 no-scrollbar items-center justify-start md:justify-center">
+            <button onclick="filterCategory('Tous')" class="category-btn active px-4 py-2 rounded-full text-xs font-bold border whitespace-nowrap">Tous</button>
+            <button onclick="filterCategory('Chaussures')" class="category-btn px-4 py-2 rounded-full text-xs font-bold border whitespace-nowrap text-gray-500">Chaussures</button>
+            <button onclick="filterCategory('Vêtements')" class="category-btn px-4 py-2 rounded-full text-xs font-bold border whitespace-nowrap text-gray-500">Vêtements</button>
+            <button onclick="filterCategory('Tech')" class="category-btn px-4 py-2 rounded-full text-xs font-bold border whitespace-nowrap text-gray-500">Apple & Tech</button>
+            <button onclick="filterCategory('Audio')" class="category-btn px-4 py-2 rounded-full text-xs font-bold border whitespace-nowrap text-gray-500">Audio (JBL/Marshall)</button>
         </div>
     </nav>
 
-    <section class="max-w-7xl mx-auto py-12 px-6">
-        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            </div>
+    <section class="max-w-7xl mx-auto py-8 px-6">
+        <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
     </section>
 
     <div id="cart-panel" class="fixed inset-0 bg-black/50 z-[200] hidden backdrop-blur-sm">
@@ -45,70 +52,77 @@
                     <span>Total</span>
                     <span id="cart-total" class="text-indigo-600">0.00 €</span>
                 </div>
-                <button onclick="checkout()" class="w-full aura-gradient text-white py-4 rounded-2xl font-extrabold text-lg shadow-xl hover:scale-[1.02] transition">COMMANDER VIA WHATSAPP</button>
+                <button onclick="checkout()" class="w-full aura-gradient text-white py-4 rounded-2xl font-extrabold text-lg shadow-xl hover:scale-[1.02] transition uppercase tracking-tighter">Commander via WhatsApp</button>
             </div>
-        </div>
-    </div>
-
-    <div id="admin-panel" class="fixed inset-0 bg-slate-900/90 z-[300] hidden items-center justify-center p-6">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-sm text-center">
-            <h3 class="text-xl font-bold mb-6">Accès Propriétaire</h3>
-            <p class="text-sm text-gray-500 mb-4">Importe un nouveau CSV pour changer la liste</p>
-            <input type="file" id="csv-file" accept=".csv" class="mb-4 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-50 file:text-indigo-700 font-bold"/>
-            <button onclick="processCSV()" class="w-full bg-black text-white py-3 rounded-xl font-bold mb-2">Mettre à jour Boutique</button>
-            <button onclick="toggleAdmin()" class="text-slate-400 text-sm">Fermer</button>
         </div>
     </div>
 
     <script>
         let cart = [];
-        // Tes articles par défaut (Dropshipping)
-        let products = [
-            { id: 0, name: "Nike Air Force 1", price: 75, img: "https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/AIR+FORCE+1+%2707.png" },
-            { id: 1, name: "Jordan 4 White Thunder", price: 115, img: "https://images.stockx.com/360/Air-Jordan-4-Retro-White-Thunder/Images/Air-Jordan-4-Retro-White-Thunder/Lv2/img01.jpg" },
-            { id: 2, name: "Dior B30 Luxury", price: 130, img: "https://images.stockx.com/images/Dior-B30-Black-Mesh-and-Technical-Fabric-Product.jpg" },
-            { id: 3, name: "North Face Puffer 700", price: 90, img: "https://images.stockx.com/images/The-North-Face-1996-Retro-Nuptse-Packable-Jacket-Black-Product.jpg" },
-            { id: 4, name: "AirPods Max", price: 145, img: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/airpods-max-select-silver-202011?wid=470&hei=556&fmt=png-alpha" },
-            { id: 5, name: "iPhone 16 Pro Max", price: 790, img: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-16-pro-model-unselect-gallery-2-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80" }
+        const products = [
+            // CHAUSSURES
+            { name: "Nike Air Force 1", price: 75, cat: "Chaussures", img: "https://static.nike.com/a/images/t_PDP_1280_v1/f_auto,q_auto:eco/b7d9211c-26e7-431a-ac24-b0540fb3c00f/AIR+FORCE+1+%2707.png" },
+            { name: "Jordan 4 White Thunder", price: 115, cat: "Chaussures", img: "https://images.stockx.com/360/Air-Jordan-4-Retro-White-Thunder/Images/Air-Jordan-4-Retro-White-Thunder/Lv2/img01.jpg" },
+            { name: "Dior B30 Luxury", price: 130, cat: "Chaussures", img: "https://images.stockx.com/images/Dior-B30-Black-Mesh-and-Technical-Fabric-Product.jpg" },
+            
+            // VETEMENTS
+            { name: "North Face Puffer 700", price: 90, cat: "Vêtements", img: "https://images.stockx.com/images/The-North-Face-1996-Retro-Nuptse-Packable-Jacket-Black-Product.jpg" },
+            { name: "Gallery Dept. Jean", price: 65, cat: "Vêtements", img: "https://images.stockx.com/images/Gallery-Dept-Le-501-Jeans-Blue-Product.jpg" },
+            { name: "Ralph Lauren Sweater", price: 50, cat: "Vêtements", img: "https://m.media-amazon.com/images/I/71T1T+0p90L._AC_UY1100_.jpg" },
+            { name: "Moncler MAYA Jacket", price: 185, cat: "Vêtements", img: "https://images.stockx.com/images/Moncler-Maya-Short-Down-Jacket-Black-Product.jpg" },
+            { name: "Canada Goose Wyndham", price: 195, cat: "Vêtements", img: "https://images.stockx.com/images/Canada-Goose-Wyndham-Parka-Black-Label-Black-Product.jpg" },
+            
+            // APPLE TECH
+            { name: "iPhone 16 Pro Max", price: 790, cat: "Tech", img: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-16-pro-model-unselect-gallery-2-202409?wid=5120&hei=2880&fmt=p-jpg&qlt=80" },
+            { name: "AirPods Max", price: 145, cat: "Tech", img: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/airpods-max-select-silver-202011?wid=470&hei=556&fmt=png-alpha" },
+            { name: "AirPods Pro 2", price: 45, cat: "Tech", img: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/MTJV3?wid=1144&hei=1144&fmt=jpeg&qlt=90" },
+            { name: "Apple Watch Series 9", price: 150, cat: "Tech", img: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/MTXF3ref_VW_34FR+watch-45-alum-midnight-cell-s9_VW_34FR_WF_CO?wid=750&hei=712&trim=1,0&fmt=p-jpg&qlt=95" },
+
+            // AUDIO
+            { name: "JBL Boombox 3", price: 110, cat: "Audio", img: "https://www.jbl.com/dw/image/v2/AA9H_PRD/on/demandware.static/-/Sites-masterCatalog_Harman/default/dw106d8124/JBL_BOOMBOX_3_HERO_BLACK_29352_x1.png" },
+            { name: "Marshall Willen", price: 35, cat: "Audio", img: "https://m.media-amazon.com/images/I/71C7N-XyP2L._AC_SL1500_.jpg" },
+            { name: "Marshall Emberton II", price: 75, cat: "Audio", img: "https://m.media-amazon.com/images/I/71G1f6R7GXL._AC_SL1500_.jpg" }
         ];
 
-        function toggleCart() { document.getElementById('cart-panel').classList.toggle('hidden'); }
-        function toggleAdmin() { document.getElementById('admin-panel').classList.toggle('hidden'); }
+        function filterCategory(cat) {
+            // Update buttons style
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-white');
+                btn.classList.add('text-gray-500');
+                if(btn.innerText === cat) {
+                    btn.classList.add('active');
+                    btn.classList.remove('text-gray-500');
+                }
+            });
+            renderProducts(cat);
+        }
 
-        function renderProducts() {
+        function renderProducts(filter = 'Tous') {
             const grid = document.getElementById('products-grid');
-            grid.innerHTML = products.map(p => `
-                <div class="bg-white p-6 rounded-[2rem] shadow-sm hover:shadow-xl transition-all border border-slate-100 group">
-                    <div class="bg-slate-50 rounded-2xl mb-4 overflow-hidden">
-                        <img src="${p.img}" alt="${p.name}" class="product-img">
+            const filtered = filter === 'Tous' ? products : products.filter(p => p.cat === filter);
+            
+            grid.innerHTML = filtered.map((p, index) => `
+                <div class="product-card bg-white p-4 rounded-[1.5rem] shadow-sm border border-slate-100 flex flex-col justify-between">
+                    <div>
+                        <div class="h-32 md:h-48 bg-slate-50 rounded-2xl mb-4 overflow-hidden flex items-center justify-center">
+                            <img src="${p.img}" alt="${p.name}" class="max-h-full max-w-full object-contain mix-blend-multiply" onerror="this.src='https://via.placeholder.com/300?text=Aura+Boutique'">
+                        </div>
+                        <h4 class="text-sm md:text-md font-bold leading-tight mb-1">${p.name}</h4>
+                        <p class="text-indigo-600 font-black text-lg mb-4">${p.price.toFixed(2)}€</p>
                     </div>
-                    <h4 class="text-lg font-bold">${p.name}</h4>
-                    <p class="text-indigo-600 font-black text-xl mb-4">${p.price.toFixed(2)}€</p>
-                    <button onclick="addToCart(${p.id})" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold group-hover:bg-indigo-600 transition">Ajouter au panier</button>
+                    <button onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price})" class="w-full bg-slate-900 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-600 transition">Ajouter au panier</button>
                 </div>
             `).join('');
         }
 
-        function processCSV() {
-            const file = document.getElementById('csv-file').files[0];
-            if(!file) return alert("Choisis un fichier !");
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const lines = e.target.result.split('\n').slice(1);
-                products = lines.filter(l => l.trim()).map((l, i) => {
-                    const cols = l.split(',');
-                    return { id: i, name: cols[0], price: parseFloat(cols[1]), img: "https://via.placeholder.com/300?text=Produit" };
-                });
-                renderProducts();
-                toggleAdmin();
-            };
-            reader.readAsText(file);
-        }
-
-        function addToCart(id) {
-            const prod = products.find(p => p.id === id);
-            cart.push(prod);
+        function toggleCart() { document.getElementById('cart-panel').classList.toggle('hidden'); }
+        
+        function addToCart(name, price) {
+            cart.push({ name, price });
             updateCart();
+            const btn = event.target;
+            btn.innerText = "Ajouté ! ✓";
+            setTimeout(() => btn.innerText = "Ajouter au panier", 1000);
         }
 
         function updateCart() {
@@ -116,7 +130,7 @@
             const items = document.getElementById('cart-items');
             items.innerHTML = cart.map((item, index) => `
                 <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl">
-                    <div><p class="font-bold text-sm">${item.name}</p><p class="text-indigo-600 font-bold">${item.price}€</p></div>
+                    <div><p class="font-bold text-xs">${item.name}</p><p class="text-indigo-600 font-bold">${item.price}€</p></div>
                     <button onclick="cart.splice(${index},1);updateCart()" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `).join('');
@@ -125,15 +139,14 @@
         }
 
         function checkout() {
-            if(cart.length === 0) return alert("Ton panier est vide !");
-            const num = "TON_NUMERO"; // REMPLACE PAR TON NUMERO
-            let message = "Bonjour Aura Boutique, je souhaite commander : %0A";
-            cart.forEach(item => message += `- ${item.name} (${item.price}€)%0A`);
-            message += `%0A*Total : ${document.getElementById('cart-total').innerText}*`;
-            window.location.href = `https://wa.me/${num}?text=${message}`;
+            if(cart.length === 0) return alert("Panier vide !");
+            const num = "33700000000"; // REMPLACE ICI PAR TON NUMERO SANS LE +
+            let text = "Bonjour Aura Boutique, je veux commander :%0A";
+            cart.forEach(i => text += `- ${i.name} (${i.price}€)%0A`);
+            text += `%0A*TOTAL : ${document.getElementById('cart-total').innerText}*`;
+            window.location.href = `https://wa.me/${num}?text=${text}`;
         }
 
-        // Charger les produits au démarrage
         renderProducts();
     </script>
 </body>
