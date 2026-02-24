@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Boutique | Officiel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s ease; }
+        .aura-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <nav class="border-b border-gray-100 sticky top-0 bg-white/90 backdrop-blur-md z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-extrabold italic">AURA<span class="text-indigo-600 font-light">BOUTIQUE</span></h1>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleCart()" class="relative p-2 text-slate-700">
+                    <i class="fa-solid fa-cart-shopping text-xl"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">0</span>
+                </button>
+                <button onclick="toggleAdmin()" class="bg-black text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-indigo-600 transition">Propriétaire</button>
+            </div>
+        </div>
+    </nav>
+
+    <section class="max-w-7xl mx-auto py-12 px-6">
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div id="empty-state" class="col-span-full text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200">
+                <p class="text-slate-400">Bonjour Chef ! Importe ton catalogue via l'espace propriétaire.</p>
+            </div>
+        </div>
+    </section>
+
+    <div id="cart-panel" class="fixed inset-0 bg-black/50 z-[200] hidden backdrop-blur-sm">
+        <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl p-8 flex flex-col">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-2xl font-bold italic">Mon Panier</h3>
+                <button onclick="toggleCart()"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            </div>
+            <div id="cart-items" class="flex-1 overflow-y-auto space-y-4">
+                </div>
+            <div class="border-t pt-6 mt-6">
+                <div class="flex justify-between text-xl font-bold mb-6">
+                    <span>Total</span>
+                    <span id="cart-total" class="text-indigo-600">0.00 €</span>
+                </div>
+                <button onclick="checkout()" class="w-full aura-gradient text-white py-4 rounded-2xl font-extrabold text-lg shadow-xl hover:scale-[1.02] transition">PAYER PAR CARTE / PAYPAL</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="fixed inset-0 bg-slate-900/90 z-[300] hidden items-center justify-center p-6">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-sm text-center">
+            <h3 class="text-xl font-bold mb-6">Accès Propriétaire</h3>
+            <input type="file" id="csv-file" accept=".csv" class="mb-4 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-indigo-50 file:text-indigo-700 font-bold"/>
+            <button onclick="processCSV()" class="w-full bg-black text-white py-3 rounded-xl font-bold mb-2">Mettre à jour Boutique</button>
+            <button onclick="toggleAdmin()" class="text-slate-400 text-sm">Fermer</button>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+        let products = [];
+
+        function toggleCart() { document.getElementById('cart-panel').classList.toggle('hidden'); }
+        function toggleAdmin() { document.getElementById('admin-panel').classList.toggle('hidden'); }
+
+        function processCSV() {
+            const file = document.getElementById('csv-file').files[0];
+            if(!file) return alert("Choisis un fichier !");
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const lines = e.target.result.split('\n').slice(1);
+                products = lines.filter(l => l.trim()).map((l, i) => {
+                    const cols = l.split(',');
+                    return { id: i, name: cols[0], price: parseFloat(cols[1]), desc: cols[2] || "Aura Boutique Edition" };
+                });
+                renderProducts();
+                toggleAdmin();
+            };
+            reader.readAsText(file);
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = products.map(p => `
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm hover:shadow-xl transition-all border border-slate-100 group">
+                    <div class="h-48 bg-slate-50 rounded-2xl mb-4 flex items-center justify-center italic text-slate-300 font-bold">AURA PIC</div>
+                    <h4 class="text-lg font-bold">${p.name}</h4>
+                    <p class="text-indigo-600 font-black text-xl mb-4">${p.price.toFixed(2)}€</p>
+                    <button onclick="addToCart(${p.id})" class="w-full bg-slate-900 text-white py-3 rounded-xl font-bold group-hover:bg-indigo-600 transition">Ajouter au panier</button>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(id) {
+            const prod = products.find(p => p.id === id);
+            cart.push(prod);
+            updateCart();
+            alert(`${prod.name} ajouté !`);
+        }
+
+        function updateCart() {
+            document.getElementById('cart-count').innerText = cart.length;
+            const items = document.getElementById('cart-items');
+            items.innerHTML = cart.map((item, index) => `
+                <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl">
+                    <div><p class="font-bold text-sm">${item.name}</p><p class="text-indigo-600 font-bold">${item.price}€</p></div>
+                    <button onclick="cart.splice(${index},1);updateCart()" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `).join('');
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            document.getElementById('cart-total').innerText = total.toFixed(2) + ' €';
+        }
+
+        function checkout() {
+            if(cart.length === 0) return alert("Ton panier est vide !");
+            const total = document.getElementById('cart-total').innerText;
+            // Ici on simule l'ouverture d'une fenêtre de paiement
+            const confirmPay = confirm(`Procéder au paiement de ${total} ?\n\n(Ceci est une démo. Pour le vrai paiement, connectez votre compte Stripe ou PayPal dans les paramètres)`);
+            if(confirmPay) {
+                alert("Paiement validé ! Merci de votre confiance chez Aura Boutique.");
+                cart = [];
+                updateCart();
+                toggleCart();
+            }
+        }
+    </script>
+</body>
+</html>
